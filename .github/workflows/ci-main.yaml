@@ -1,0 +1,22 @@
+name: ci-rws
+on:
+  push:
+    branches:
+    - master
+    
+jobs:
+
+#building app
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build
+      run: |
+        SHA=${GITHUB_SHA:0:7}
+        APP=${GITHUB_REPOSITORY#*/}
+        DOCKER_URL=${{ secrets.REGISTRY_URL }}/${{ secrets.REGISTRY_REPO }}/${APP}/${APP}-rws:${SHA}
+        cd rws
+        docker login ${{ secrets.REGISTRY_URL }} -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }}
+        docker build . --no-cache -f Dockerfile -t ${DOCKER_URL}
+        docker push ${DOCKER_URL}
